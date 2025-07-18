@@ -1547,9 +1547,7 @@ let transl_effect env sext =
       (fun () ->
         TyVarEnv.reset();
         transl_extension_constructor ~scope env Predef.path_eff
-          [ Types.create_expr (Types.Tvar None) ~level:0 ~scope:0 ~id:0 ]
-          [ Types.create_expr (Types.Tvar None) ~level:0 ~scope:0 ~id:0 ]
-          Asttypes.Public sext)
+          [ Ctype.newvar () ] [ Ctype.newvar () ] Asttypes.Public sext)
   in
   (* Check that all type variables are closed *)
   begin match Ctype.closed_extension_constructor ext.ext_type with

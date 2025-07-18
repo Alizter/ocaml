@@ -36,13 +36,29 @@ module type S =
   end
 |}]
 
-let local () : string =
+let local () =
   let effect A in
   let effect B of int in
   let effect C : int -> string eff in
   Effect.perform A;
   Effect.perform (B 42);
   Effect.perform (C 99)
+[@@warning "-21"]
 [%%expect{|
 val local : unit -> string = <fun>
+|}]
+
+(* TODO: Fix *)
+module M_decl = struct
+  include (M : S)
+  effect A_ = A
+  effect B_ = B
+  effect C_ = C
+end
+[%%expect{|
+Line 5, characters 14-15:
+5 |   effect C_ = C
+                  ^
+Error: The constructor "C" extends type "eff" whose declaration does not match
+       the declaration of type "eff"
 |}]
