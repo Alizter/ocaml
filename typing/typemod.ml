@@ -1685,6 +1685,18 @@ and transl_signature env sg =
                        Text_exception,
                        Exported) :: rem,
             final_env
+        | Psig_effect sext ->
+          let (ext, newenv, _s) = Typedecl.transl_type_effect env sext in
+          let constructor = ext.tyeff_constructor in
+          Signature_names.check_typext names constructor.ext_loc
+            constructor.ext_id;
+          let (trem, rem, final_env) = transl_sig newenv srem in
+          mksig (Tsig_effect ext) env loc :: trem,
+          Sig_typext(constructor.ext_id,
+                     constructor.ext_type,
+                     Text_effect,
+                     Exported) :: rem,
+          final_env
         | Psig_module pmd ->
             let scope = Ctype.create_scope () in
             let tmty =
@@ -2862,6 +2874,20 @@ and type_str_item ~names ~toplevel ~funct_body anchor env shape_map
         [Sig_typext(constructor.ext_id,
                     constructor.ext_type,
                     Text_exception,
+                    Exported)],
+        Shape.Map.add_extcons shape_map
+          constructor.ext_id
+          shape,
+        newenv
+    | Pstr_effect seff ->
+        let (ext, newenv, shape) = Typedecl.transl_type_effect env seff in
+        let constructor = ext.tyeff_constructor in
+        Signature_names.check_typext names constructor.ext_loc
+          constructor.ext_id;
+        Tstr_effect ext,
+        [Sig_typext(constructor.ext_id,
+                    constructor.ext_type,
+                    Text_effect,
                     Exported)],
         Shape.Map.add_extcons shape_map
           constructor.ext_id

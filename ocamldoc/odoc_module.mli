@@ -30,6 +30,7 @@ type module_element =
   | Element_value of Odoc_value.t_value
   | Element_type_extension of Odoc_extension.t_type_extension
   | Element_exception of Odoc_exception.t_exception
+  | Element_effect of unit (* TODO *)
   | Element_type of Odoc_type.t_type
   | Element_module_comment of Odoc_types.text
 (** To keep the order of elements in a module. *)

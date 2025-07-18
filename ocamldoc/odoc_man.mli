@@ -65,6 +65,8 @@ module Generator :
           Buffer.t -> string -> Odoc_info.text -> unit
         method man_of_exception :
           Buffer.t -> Odoc_info.Exception.t_exception -> unit
+        method man_of_effect :
+          Buffer.t -> unit -> unit (* TODO *)
         method man_of_included_module :
           Buffer.t ->
           Odoc_info.Name.t -> Odoc_info.Module.included_module -> unit
@@ -174,6 +176,8 @@ module type Man_generator =
           Buffer.t -> string -> Odoc_info.text -> unit
         method man_of_exception :
           Buffer.t -> Odoc_info.Exception.t_exception -> unit
+        method man_of_effect :
+          Buffer.t -> unit -> unit (* TODO *)
         method man_of_included_module :
           Buffer.t ->
           Odoc_info.Name.t -> Odoc_info.Module.included_module -> unit

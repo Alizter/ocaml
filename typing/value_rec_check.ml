@@ -1098,7 +1098,8 @@ and structure_item : Typedtree.structure_item -> bind_judg =
       Env.join
         (list extension_constructor exts m)
         (Env.remove_list ext_ids env)
-    | Tstr_exception {tyexn_constructor = ext; _} ->
+    | Tstr_exception {tyexn_constructor = ext; _}
+    | Tstr_effect {tyeff_constructor = ext; _} ->
       Env.join
         (extension_constructor ext m)
         (Env.remove ext.ext_id env)

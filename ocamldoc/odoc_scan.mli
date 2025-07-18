@@ -27,6 +27,7 @@ class scanner :
     method scan_class_type_elements : Odoc_class.t_class_type -> unit
     method scan_class_type_pre : Odoc_class.t_class_type -> bool
     method scan_exception : Odoc_exception.t_exception -> unit
+    method scan_effect : unit -> unit (* TODO *)
     method scan_extension_constructor :
       Odoc_extension.t_extension_constructor -> unit
     method scan_included_module : Odoc_module.included_module -> unit

@@ -79,6 +79,9 @@ module Typedtree_search =
       | Typedtree.Tstr_exception ext ->
           Hashtbl.add table (E (Name.from_ident ext.tyexn_constructor.ext_id))
             tt
+      | Typedtree.Tstr_effect ext ->
+          Hashtbl.add table (E (Name.from_ident ext.tyeff_constructor.ext_id))
+            tt
       | Typedtree.Tstr_type (rf, ident_type_decl_list) ->
           List.iter
             (fun td ->
@@ -927,6 +930,7 @@ module Analyser =
                   and n2 = Ident.name ident in
                   n1 = n2
               | _ -> false)
+        | Element_effect () -> fun _ -> false (* TODO *)
         | Element_class c ->
             (function
                 Types.Sig_class (ident,_,_, _) ->
@@ -1347,6 +1351,11 @@ module Analyser =
                 }
           in
             (0, new_env, [ Element_exception new_ext ])
+
+      (* TODO *)
+      | Parsetree.Pstr_effect ext ->
+            ignore ext;
+            (0, assert false, [ Element_effect () ])
 
       | Parsetree.Pstr_module {Parsetree.pmb_name={txt=None}} ->
           (0, env, [])

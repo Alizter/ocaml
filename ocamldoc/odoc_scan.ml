@@ -45,6 +45,7 @@ class scanner =
 
     method scan_extension_constructor (_ : Odoc_extension.t_extension_constructor) = ()
     method scan_exception (_ : Odoc_exception.t_exception) = ()
+    method scan_effect (_ : unit) = () (* TODO *)
     method scan_attribute (_ : Odoc_value.t_attribute) = ()
     method scan_method (_ : Odoc_value.t_method) = ()
     method scan_included_module (_ : Odoc_module.included_module) = ()
@@ -142,6 +143,7 @@ class scanner =
           | Odoc_module.Element_value v -> self#scan_value v
           | Odoc_module.Element_type_extension x -> self#scan_type_extension x
           | Odoc_module.Element_exception e -> self#scan_exception e
+          | Odoc_module.Element_effect e -> self#scan_effect e
           | Odoc_module.Element_type t -> self#scan_type t
           | Odoc_module.Element_module_comment t -> self#scan_module_comment t
         )
@@ -174,6 +176,7 @@ class scanner =
           | Odoc_module.Element_value v -> self#scan_value v
           | Odoc_module.Element_type_extension x -> self#scan_type_extension x
           | Odoc_module.Element_exception e -> self#scan_exception e
+          | Odoc_module.Element_effect e -> self#scan_effect e
           | Odoc_module.Element_type t -> self#scan_type t
           | Odoc_module.Element_module_comment t -> self#scan_module_comment t
         )

@@ -1540,6 +1540,39 @@ let transl_type_exception env t =
    tyexn_loc = t.ptyexn_loc;
    tyexn_attributes = t.ptyexn_attributes}, newenv, shape
 
+let transl_effect env sext =
+  let ext, shape =
+    let scope = Ctype.create_scope () in
+    Ctype.with_local_level_generalize
+      (fun () ->
+        TyVarEnv.reset();
+        transl_extension_constructor ~scope env Predef.path_eff
+          [ Types.create_expr (Types.Tvar None) ~level:0 ~scope:0 ~id:0 ]
+          [ Types.create_expr (Types.Tvar None) ~level:0 ~scope:0 ~id:0 ]
+          Asttypes.Public sext)
+  in
+  (* Check that all type variables are closed *)
+  begin match Ctype.closed_extension_constructor ext.ext_type with
+    Some ty ->
+      raise (Error(ext.ext_loc, Unbound_type_var_ext(ty, ext.ext_type)))
+  | None -> ()
+  end;
+  let rebind = is_rebind ext in
+  let newenv =
+    Env.add_extension ~check:true ~shape ~rebind ext.ext_id ext.ext_type env
+  in
+  ext, newenv, shape
+
+let transl_type_effect env t =
+  let constructor, newenv, shape =
+    Builtin_attributes.warning_scope t.ptyeff_attributes
+      (fun () ->
+         transl_effect env t.ptyeff_constructor
+      )
+  in
+  {tyeff_constructor = constructor;
+   tyeff_loc = t.ptyeff_loc;
+   tyeff_attributes = t.ptyeff_attributes}, newenv, shape
 
 type native_repr_attribute =
   | Native_repr_attr_absent

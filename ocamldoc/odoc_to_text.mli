@@ -56,6 +56,8 @@ class virtual to_text :
     method text_of_custom : (string * Odoc_info.text) list -> Odoc_info.text
     method text_of_exception :
       Odoc_info.Exception.t_exception -> Odoc_info.text_element list
+    method text_of_effect :
+      unit -> Odoc_info.text_element list (* TODO *)
     method text_of_info :
       ?block:bool -> Odoc_info.info option -> Odoc_info.text_element list
     method text_of_method :

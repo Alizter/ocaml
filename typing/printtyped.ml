@@ -552,6 +552,14 @@ and type_exception i ppf x =
   let i = i+1 in
   extension_constructor i ppf x.tyexn_constructor
 
+and type_effect i ppf x =
+  line i ppf "type_effect\n";
+  attributes i ppf x.tyeff_attributes;
+  let i = i+1 in
+  line i ppf "ptyext_constructor =\n";
+  let i = i+1 in
+  extension_constructor i ppf x.tyeff_constructor
+
 and extension_constructor i ppf x =
   line i ppf "extension_constructor %a\n" fmt_location x.ext_loc;
   attributes i ppf x.ext_attributes;
@@ -772,6 +780,9 @@ and signature_item i ppf x =
   | Tsig_exception ext ->
       line i ppf "Tsig_exception\n";
       type_exception i ppf ext
+  | Tsig_effect ext ->
+      line i ppf "Tsig_effect\n";
+      type_effect i ppf ext
   | Tsig_module md ->
       line i ppf "Tsig_module %a\n" fmt_presence md.md_presence;
       module_declaration i ppf md
@@ -896,6 +907,9 @@ and structure_item i ppf x =
   | Tstr_exception ext ->
       line i ppf "Tstr_exception\n";
       type_exception i ppf ext;
+  | Tstr_effect ext ->
+      line i ppf "Tstr_effect\n";
+      type_effect i ppf ext
   | Tstr_module x ->
       line i ppf "Tstr_module %a\n" fmt_presence x.mb_presence;
       module_binding i ppf x

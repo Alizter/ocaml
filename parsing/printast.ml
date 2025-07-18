@@ -507,6 +507,14 @@ and type_exception i ppf x =
   let i = i+1 in
   extension_constructor i ppf x.ptyexn_constructor
 
+and type_effect i ppf x =
+  line i ppf "type_effect\n";
+  attributes i ppf x.ptyeff_attributes;
+  let i = i+1 in
+  line i ppf "ptyext_constructor =\n";
+  let i = i+1 in
+  extension_constructor i ppf x.ptyeff_constructor
+
 and extension_constructor i ppf x =
   line i ppf "extension_constructor %a\n" fmt_location x.pext_loc;
   attributes i ppf x.pext_attributes;
@@ -743,6 +751,9 @@ and signature_item i ppf x =
   | Psig_exception te ->
       line i ppf "Psig_exception\n";
       type_exception i ppf te
+  | Psig_effect te ->
+      line i ppf "Psig_effect\n";
+      type_effect i ppf te
   | Psig_module pmd ->
       line i ppf "Psig_module %a\n" fmt_str_opt_loc pmd.pmd_name;
       attributes i ppf pmd.pmd_attributes;
@@ -872,6 +883,9 @@ and structure_item i ppf x =
   | Pstr_exception te ->
       line i ppf "Pstr_exception\n";
       type_exception i ppf te
+  | Pstr_effect te ->
+      line i ppf "Pstr_effect\n";
+      type_effect i ppf te
   | Pstr_module x ->
       line i ppf "Pstr_module\n";
       module_binding i ppf x

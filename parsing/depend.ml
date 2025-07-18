@@ -166,6 +166,9 @@ let add_type_extension bv te =
 let add_type_exception bv te =
   add_extension_constructor bv te.ptyexn_constructor
 
+let add_type_effect bv te =
+  add_extension_constructor bv te.ptyeff_constructor
+
 let pattern_bv = ref String.Map.empty
 
 let rec add_pattern bv pat =
@@ -388,6 +391,8 @@ and add_sig_item (bv, m) item =
       add_type_extension bv te; (bv, m)
   | Psig_exception te ->
       add_type_exception bv te; (bv, m)
+  | Psig_effect te ->
+      add_type_effect bv te; (bv, m)
   | Psig_module pmd ->
       let m' = add_modtype_binding bv pmd.pmd_type in
       let add map =
@@ -528,6 +533,9 @@ and add_struct_item (bv, m) item : _ String.Map.t * _ String.Map.t =
       (bv, m)
   | Pstr_exception te ->
       add_type_exception bv te;
+      (bv, m)
+  | Pstr_effect te ->
+      add_type_effect bv te;
       (bv, m)
   | Pstr_module x ->
       let b = add_module_binding bv x.pmb_expr in

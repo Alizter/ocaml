@@ -557,6 +557,7 @@ class man =
       self#man_of_info b e.ex_info;
       bs b "\n.sp\n"
 
+    method man_of_effect b e = ignore (b, e); () (* TODO *)
 
     method field_comment b = function
       | None -> ()
@@ -1035,6 +1036,8 @@ class man =
               self#man_of_type_extension b mt.mt_name te
           | Element_exception e ->
               self#man_of_exception b e
+          | Element_effect e ->
+              self#man_of_effect b e
           | Element_type t ->
               self#man_of_type b t
           | Element_module_comment text ->
@@ -1117,6 +1120,8 @@ class man =
               self#man_of_type_extension b m.m_name te
           | Element_exception e ->
               self#man_of_exception b e
+          | Element_effect e ->
+              self#man_of_effect b e
           | Element_type t ->
               self#man_of_type b t
           | Element_module_comment text ->

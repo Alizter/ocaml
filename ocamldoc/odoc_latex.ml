@@ -760,6 +760,8 @@ class latex =
        @ (self#text_of_info e.ex_info) in
       self#latex_of_text fmt text
 
+    method latex_of_effect fmt e = ignore (fmt, e) (* TODO *)
+
     method latex_of_module_parameter fmt m_name p =
       self#latex_of_text fmt
         [
@@ -1152,6 +1154,7 @@ class latex =
       | Element_value v -> self#latex_of_value fmt v
       | Element_type_extension te -> self#latex_of_type_extension module_name fmt te
       | Element_exception e -> self#latex_of_exception fmt e
+      | Element_effect e -> self#latex_of_effect fmt e
       | Element_type t -> self#latex_of_type fmt t
       | Element_module_comment t -> self#latex_of_text fmt t
 

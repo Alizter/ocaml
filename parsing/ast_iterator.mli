@@ -74,6 +74,7 @@ type iterator = {
   type_declaration: iterator -> type_declaration -> unit;
   type_extension: iterator -> type_extension -> unit;
   type_exception: iterator -> type_exception -> unit;
+  type_effect: iterator -> type_effect -> unit;
   type_kind: iterator -> type_kind -> unit;
   value_binding: iterator -> value_binding -> unit;
   value_description: iterator -> value_description -> unit;

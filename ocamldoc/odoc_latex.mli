@@ -155,6 +155,8 @@ module Generator :
           Format.formatter -> string -> Odoc_info.text -> unit
         method latex_of_exception :
           Format.formatter -> Odoc_info.Exception.t_exception -> unit
+        method latex_of_effect :
+          Format.formatter -> unit -> unit (* TODO *)
         method latex_of_included_module :
           Format.formatter -> Odoc_info.Module.included_module -> unit
         method latex_of_info :
@@ -242,6 +244,8 @@ module Generator :
           (string * Odoc_info.text) list -> Odoc_info.text
         method text_of_exception :
           Odoc_info.Exception.t_exception -> Odoc_info.text_element list
+        method text_of_effect :
+          unit -> Odoc_info.text_element list (* TODO *)
         method text_of_info :
           ?block:bool -> Odoc_info.info option -> Odoc_info.text
         method text_of_method :
@@ -400,6 +404,8 @@ module type Latex_generator =
           Format.formatter -> string -> Odoc_info.text -> unit
         method latex_of_exception :
           Format.formatter -> Odoc_info.Exception.t_exception -> unit
+        method latex_of_effect :
+          Format.formatter -> unit -> unit (* TODO *)
         method latex_of_included_module :
           Format.formatter -> Odoc_info.Module.included_module -> unit
         method latex_of_info :
@@ -487,6 +493,8 @@ module type Latex_generator =
           (string * Odoc_info.text) list -> Odoc_info.text
         method text_of_exception :
           Odoc_info.Exception.t_exception -> Odoc_info.text_element list
+        method text_of_effect :
+          unit -> Odoc_info.text_element list (* TODO *)
         method text_of_info :
           ?block:bool -> Odoc_info.info option -> Odoc_info.text
         method text_of_method :

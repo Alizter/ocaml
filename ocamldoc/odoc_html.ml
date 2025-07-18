@@ -1482,6 +1482,8 @@ class html =
           self#html_of_type_extension b m_name te
       | Element_exception e ->
           self#html_of_exception b e
+      | Element_effect e ->
+          self#html_of_effect b e
       | Element_type t ->
           self#html_of_type b t
       | Element_module_comment text ->
@@ -1694,6 +1696,8 @@ class html =
       );
       bs b "</pre>\n";
       self#html_of_info b e.ex_info
+
+    method html_of_effect b e = ignore (b, e)
 
     method html_of_record ~father ~close_env gen_name  b l =
       bs b "{";

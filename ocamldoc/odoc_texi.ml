@@ -103,6 +103,7 @@ type indices = [
   | `Type
   | `Extension
   | `Exception
+  | `Effect
   | `Value
   | `Class_att
   | `Method
@@ -116,6 +117,7 @@ let indices = function
   | `Type        -> "ty"
   | `Extension   -> "xt"
   | `Exception   -> "ex"
+  | `Effect      -> "ef"
   | `Value       -> "va"
   | `Class_att   -> "ca"
   | `Method      -> "me"
@@ -128,6 +130,7 @@ let indices_names = [
   "Types"           , "ty" ;
   "Extensions"      , "xt" ;
   "Exceptions"      , "ex" ;
+  "Effects"         , "ef" ;
   "Values"          , "va" ;
   "Class attributes", "ca" ;
   "Methods"         , "me" ;
@@ -784,6 +787,10 @@ class texi =
         (self#text_of_info e.ex_info) in
       self#texi_of_text t
 
+    (** Return Texinfo code for an effect. *)
+    method texi_of_effect e =
+      ignore e;
+      ""
 
     (** Return the Texinfo code for the given module. *)
     method texi_of_module m =
@@ -902,6 +909,7 @@ class texi =
       | Element_value v -> self#texi_of_value v
       | Element_type_extension te -> self#texi_of_type_extension module_name te
       | Element_exception e -> self#texi_of_exception e
+      | Element_effect e -> self#texi_of_effect e
       | Element_type t -> self#texi_of_type t
       | Element_module_comment t ->
           self#texi_of_text (Newline :: t @ [Newline])
@@ -1263,6 +1271,7 @@ class texi =
       | Element_value _ -> self#do_index `Value
       | Element_type_extension _ -> self#do_index `Extension
       | Element_exception _ -> self#do_index `Exception
+      | Element_effect _ -> self#do_index `Effect
       | Element_type _ -> self#do_index `Type
       | Element_included_module _
       | Element_module_comment _ -> ()

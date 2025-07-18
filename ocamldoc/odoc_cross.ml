@@ -489,6 +489,7 @@ and associate_in_module_element module_list m_name (acc_b_modif, acc_incomplete_
                     ea.ea_ex <- Some e ;
                     (true, acc_incomplete_top_module_names, acc_names_not_found)
        )
+   | Element_effect () -> assert false (* TODO *)
    | Element_type _ -> (acc_b_modif, acc_incomplete_top_module_names, acc_names_not_found)
    | Element_module_comment _ -> (acc_b_modif, acc_incomplete_top_module_names, acc_names_not_found)
 
@@ -916,6 +917,7 @@ let rec assoc_comments_module_element parent_name module_list m_ele =
       Element_type_extension (assoc_comments_type_extension parent_name module_list te)
   | Element_exception e ->
       Element_exception (assoc_comments_exception module_list e)
+  | Element_effect () -> Element_effect () (* TODO *)
   | Element_type t ->
       Element_type (assoc_comments_type module_list t)
   | Element_module_comment t ->

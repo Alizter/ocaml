@@ -72,6 +72,8 @@ let pstr_type ((nr, ext), tys) =
   (Pstr_type (nr, tys), ext)
 let pstr_exception (te, ext) =
   (Pstr_exception te, ext)
+let pstr_effect (te, ext) =
+  (Pstr_effect te, ext)
 let pstr_include (body, ext) =
   (Pstr_include body, ext)
 let pstr_module (body, ext) =
@@ -102,6 +104,8 @@ let psig_typesubst ((nr, ext), tys) =
   (Psig_typesubst tys, ext)
 let psig_exception (te, ext) =
   (Psig_exception te, ext)
+let psig_effect (te, ext) =
+  (Psig_effect te, ext)
 let psig_include (body, ext) =
   (Psig_include body, ext)
 let psig_module (body, ext) =
@@ -1556,6 +1560,8 @@ structure_item:
         { pstr_typext $1 }
     | str_exception_declaration
         { pstr_exception $1 }
+    | str_effect_declaration
+        { pstr_effect $1 }
     | rec_module_bindings
         { pstr_recmodule $1 }
     | module_type_declaration
@@ -1579,6 +1585,8 @@ local_structure_item:
         { pstr_extension $1 (add_docs_attrs (symbol_docs $sloc) $2) }
     | sig_exception_declaration
         { pstr_exception $1 }
+    | sig_effect_declaration
+        { pstr_effect $1 }
     | module_binding
         { pstr_module $1 }
     | open_declaration
@@ -1809,6 +1817,8 @@ signature_item:
         { psig_typext $1 }
     | sig_exception_declaration
         { psig_exception $1 }
+    | sig_effect_declaration
+        { psig_effect $1 }
     | module_declaration
         { psig_module $1 }
     | module_alias
@@ -3474,6 +3484,36 @@ sig_exception_declaration:
       let loc = make_loc ($startpos, $endpos(attrs2)) in
       let docs = symbol_docs $sloc in
       Te.mk_exception ~attrs ~loc
+        (Te.decl id ~vars ~args ?res ~attrs:(attrs1 @ attrs2) ~loc ~docs)
+      , ext }
+;
+str_effect_declaration:
+  EFFECT
+  ext = ext
+  attrs1 = attributes
+  id = mkrhs(constr_ident)
+  EQUAL
+  lid = mkrhs(constr_longident)
+  attrs2 = attributes
+  attrs = post_item_attributes
+    { let loc = make_loc $sloc in
+      let docs = symbol_docs $sloc in
+      Te.mk_effect ~attrs ~loc
+        (Te.rebind id lid ~attrs:(attrs1 @ attrs2) ~loc ~docs)
+      , ext }
+;
+sig_effect_declaration:
+  EFFECT
+  ext = ext
+  attrs1 = attributes
+  id = mkrhs(constr_ident)
+  vars_args_res = generalized_constructor_arguments
+  attrs2 = attributes
+  attrs = post_item_attributes
+    { let vars, args, res = vars_args_res in
+      let loc = make_loc ($startpos, $endpos(attrs2)) in
+      let docs = symbol_docs $sloc in
+      Te.mk_effect ~attrs ~loc
         (Te.decl id ~vars ~args ?res ~attrs:(attrs1 @ attrs2) ~loc ~docs)
       , ext }
 ;

@@ -34,6 +34,7 @@ type indices =
     | `Class_att
     | `Class_type
     | `Exception
+    | `Effect
     | `Extension
     | `Method
     | `Module
@@ -51,6 +52,7 @@ module Generator :
           | `Class_att
           | `Class_type
           | `Exception
+          | `Effect
           | `Extension
           | `Method
           | `Module
@@ -68,6 +70,7 @@ module Generator :
           | `Class_att
           | `Class_type
           | `Exception
+          | `Effect
           | `Extension
           | `Method
           | `Module
@@ -157,6 +160,7 @@ module Generator :
         method texi_of_custom_text :
           string -> Odoc_info.text -> Odoc_info.Name.t
         method texi_of_exception : Odoc_info.Exception.t_exception -> string
+        method texi_of_effect : unit -> string (* TODO *)
         method texi_of_included_module :
           Odoc_info.Module.included_module -> string
         method texi_of_info : Odoc_info.info option -> string
@@ -199,6 +203,8 @@ module Generator :
           Odoc_info.text option -> Odoc_info.text_element list
         method text_of_exception :
           Odoc_info.Exception.t_exception -> Odoc_info.text_element list
+        method text_of_effect :
+          unit -> Odoc_info.text_element list (* TODO *)
         method text_of_info :
           ?block:bool -> Odoc_info.info option -> Odoc_info.text_element list
         method text_of_method :
@@ -257,6 +263,7 @@ module type Texi_generator =
           | `Class_att
           | `Class_type
           | `Exception
+          | `Effect
           | `Extension
           | `Method
           | `Module
@@ -274,6 +281,7 @@ module type Texi_generator =
           | `Class_att
           | `Class_type
           | `Exception
+          | `Effect
           | `Extension
           | `Method
           | `Module
@@ -363,6 +371,7 @@ module type Texi_generator =
         method texi_of_custom_text :
           string -> Odoc_info.text -> Odoc_info.Name.t
         method texi_of_exception : Odoc_info.Exception.t_exception -> string
+        method texi_of_effect : unit -> string (* TODO *)
         method texi_of_included_module :
           Odoc_info.Module.included_module -> string
         method texi_of_info : Odoc_info.info option -> string
@@ -405,6 +414,8 @@ module type Texi_generator =
           Odoc_info.text option -> Odoc_info.text_element list
         method text_of_exception :
           Odoc_info.Exception.t_exception -> Odoc_info.text_element list
+        method text_of_effect :
+          unit -> Odoc_info.text_element list (* TODO *)
         method text_of_info :
           ?block:bool -> Odoc_info.info option -> Odoc_info.text_element list
         method text_of_method :

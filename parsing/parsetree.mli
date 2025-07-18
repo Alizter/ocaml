@@ -659,6 +659,14 @@ and type_exception =
   }
 (** Definition of a new exception ([exception E]). *)
 
+and type_effect =
+  {
+    ptyeff_constructor : extension_constructor;
+    ptyeff_loc : Location.t;
+    ptyeff_attributes : attributes;
+  }
+(** Definition of a new effect ([effect E]). *)
+
 and extension_constructor_kind =
   | Pext_decl of string loc list * constructor_arguments * core_type option
       (** [Pext_decl(existentials, c_args, t_opt)]
@@ -921,6 +929,7 @@ and signature_item_desc =
       (** [type t1 := ... and ... and tn := ...]  *)
   | Psig_typext of type_extension  (** [type t1 += ...] *)
   | Psig_exception of type_exception  (** [exception C of T] *)
+  | Psig_effect of type_effect  (** [effect E of T] *)
   | Psig_module of module_declaration  (** [module X = M] and [module X : MT] *)
   | Psig_modsubst of module_substitution  (** [module X := M] *)
   | Psig_recmodule of module_declaration list
@@ -1071,6 +1080,9 @@ and structure_item_desc =
   | Pstr_exception of type_exception
       (** - [exception C of T]
             - [exception C = M.X] *)
+  | Pstr_effect of type_effect
+      (** - [effect C of T]
+            - [effect C = M.X] *)
   | Pstr_module of module_binding  (** [module X = ME] *)
   | Pstr_recmodule of module_binding list
       (** [module rec X1 = ME1 and ... and Xn = MEn] *)

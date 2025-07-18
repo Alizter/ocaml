@@ -379,6 +379,10 @@ class virtual to_text =
       [Latex ("\\index{"^(self#label s_name)^"@\\verb`"^(self#label ~no_:false s_name)^"`}\n")] @
       (self#text_of_info e.ex_info)
 
+    (** Return [text] value for an effect. *)
+    method text_of_effect (e : unit) : Odoc_info.text_element list =
+      ignore e; assert false (* TODO *)
+
     (** Return [text] value for the description of a function parameter. *)
     method text_of_parameter_description p =
       match Parameter.names p with

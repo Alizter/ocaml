@@ -575,6 +575,7 @@ module Analyser =
         | Parsetree.Psig_value _
         | Parsetree.Psig_typext _
         | Parsetree.Psig_exception _
+        | Parsetree.Psig_effect _
         | Parsetree.Psig_open _
         | Parsetree.Psig_include _
         | Parsetree.Psig_class _
@@ -1008,6 +1009,45 @@ module Analyser =
             let new_env = Odoc_env.add_extension env e.ex_name in
             (maybe_more, new_env, [ Element_exception e ])
 
+        | Parsetree.Psig_effect {Parsetree.ptyeff_constructor;ptyeff_attributes;_} ->
+            let {Parsetree.pext_name;pext_attributes;_} = ptyeff_constructor in
+            let name = pext_name.txt in
+            let types_ext =
+              try Signature_search.search_extension table name
+              with Not_found ->
+                raise (Failure (Odoc_messages.exception_not_found current_module_name name))
+            in
+            let ex_args =
+              let pos_end = Loc.end_ types_ext.ext_loc in
+              match types_ext.ext_args with
+              | Cstr_tuple l -> Cstr_tuple (List.map (Odoc_env.subst_type env) l)
+              | Cstr_record l ->
+                  let docs = Record.(doc types) pos_end l in
+                  Cstr_record (List.map (get_field env docs) l)
+            in
+            let (maybe_more, comment_opt) =
+              get_info ~attrs:(ptyeff_attributes @ pext_attributes) comment_opt
+                pos_end_ele pos_limit
+            in
+            let e =
+              {
+                ex_name = Name.concat current_module_name name ;
+                ex_info = comment_opt ;
+                ex_args;
+                ex_ret = Option.map (Odoc_env.subst_type env) types_ext.ext_ret_type ;
+                ex_alias = None ;
+                ex_loc = { loc_impl = None ; loc_inter = Some sig_item_loc } ;
+                ex_code =
+                   (
+                    if !Odoc_global.keep_code then
+                      Some (get_string_of_file pos_start_ele pos_end_ele)
+                    else
+                      None
+                   ) ;
+              }
+            in
+            let new_env = Odoc_env.add_extension env e.ex_name in
+            (maybe_more, new_env, [ Element_effect (ignore e) ]) (* TODO *)
         | Parsetree.Psig_type (rf, name_type_decl_list) ->
             let extended_env =
               List.fold_left

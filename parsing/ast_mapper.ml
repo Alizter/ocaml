@@ -79,6 +79,7 @@ type mapper = {
   type_declaration: mapper -> type_declaration -> type_declaration;
   type_extension: mapper -> type_extension -> type_extension;
   type_exception: mapper -> type_exception -> type_exception;
+  type_effect: mapper -> type_effect -> type_effect;
   type_kind: mapper -> type_kind -> type_kind;
   value_binding: mapper -> value_binding -> value_binding;
   value_description: mapper -> value_description -> value_description;
@@ -237,6 +238,13 @@ module T = struct
     Te.mk_exception ~loc ~attrs
       (sub.extension_constructor sub ptyexn_constructor)
 
+  let map_type_effect sub
+      {ptyeff_constructor; ptyeff_loc; ptyeff_attributes} =
+    let loc = sub.location sub ptyeff_loc in
+    let attrs = sub.attributes sub ptyeff_attributes in
+    Te.mk_effect ~loc ~attrs
+      (sub.extension_constructor sub ptyeff_constructor)
+
   let map_extension_constructor_kind sub = function
       Pext_decl(vars, ctl, cto) ->
         Pext_decl(List.map (map_loc sub) vars,
@@ -353,6 +361,7 @@ module MT = struct
         type_subst ~loc (List.map (sub.type_declaration sub) l)
     | Psig_typext te -> type_extension ~loc (sub.type_extension sub te)
     | Psig_exception ed -> exception_ ~loc (sub.type_exception sub ed)
+    | Psig_effect ed -> effect_ ~loc (sub.type_effect sub ed)
     | Psig_module x -> module_ ~loc (sub.module_declaration sub x)
     | Psig_modsubst x -> mod_subst ~loc (sub.module_substitution sub x)
     | Psig_recmodule l ->
@@ -408,6 +417,7 @@ module M = struct
     | Pstr_type (rf, l) -> type_ ~loc rf (List.map (sub.type_declaration sub) l)
     | Pstr_typext te -> type_extension ~loc (sub.type_extension sub te)
     | Pstr_exception ed -> exception_ ~loc (sub.type_exception sub ed)
+    | Pstr_effect ed -> effect_ ~loc (sub.type_effect sub ed)
     | Pstr_module x -> module_ ~loc (sub.module_binding sub x)
     | Pstr_recmodule l -> rec_module ~loc (List.map (sub.module_binding sub) l)
     | Pstr_modtype x -> modtype ~loc (sub.module_type_declaration sub x)
@@ -679,6 +689,7 @@ let default_mapper =
     typ = T.map;
     type_extension = T.map_type_extension;
     type_exception = T.map_type_exception;
+    type_effect = T.map_type_effect;
     extension_constructor = T.map_extension_constructor;
     package_type = T.map_package_type;
     value_description =

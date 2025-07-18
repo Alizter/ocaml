@@ -64,6 +64,7 @@ type mapper =
       -> (rec_flag * type_declaration list);
     type_extension: mapper -> type_extension -> type_extension;
     type_exception: mapper -> type_exception -> type_exception;
+    type_effect: mapper -> type_effect -> type_effect;
     type_kind: mapper -> type_kind -> type_kind;
     value_binding: mapper -> value_binding -> value_binding;
     value_bindings: mapper -> (rec_flag * value_binding list) ->
@@ -172,6 +173,7 @@ let structure_item sub {str_loc; str_desc; str_env} =
         Tstr_type (rec_flag, list)
     | Tstr_typext te -> Tstr_typext (sub.type_extension sub te)
     | Tstr_exception ext -> Tstr_exception (sub.type_exception sub ext)
+    | Tstr_effect ext -> Tstr_effect (sub.type_effect sub ext)
     | Tstr_module mb -> Tstr_module (sub.module_binding sub mb)
     | Tstr_recmodule list ->
         Tstr_recmodule (List.map (sub.module_binding sub) list)
@@ -260,6 +262,14 @@ let type_exception sub x =
   in
   let tyexn_attributes = sub.attributes sub x.tyexn_attributes in
   {tyexn_loc; tyexn_constructor; tyexn_attributes}
+
+let type_effect sub x =
+  let tyeff_loc = sub.location sub x.tyeff_loc in
+  let tyeff_constructor =
+    sub.extension_constructor sub x.tyeff_constructor
+  in
+  let tyeff_attributes = sub.attributes sub x.tyeff_attributes in
+  {tyeff_loc; tyeff_constructor; tyeff_attributes}
 
 let extension_constructor sub x =
   let ext_loc = sub.location sub x.ext_loc in
@@ -539,6 +549,8 @@ let signature_item sub x =
         Tsig_typext (sub.type_extension sub te)
     | Tsig_exception ext ->
         Tsig_exception (sub.type_exception sub ext)
+    | Tsig_effect ext ->
+        Tsig_effect (sub.type_effect sub ext)
     | Tsig_module x ->
         Tsig_module (sub.module_declaration sub x)
     | Tsig_modsubst x ->
@@ -913,6 +925,7 @@ let default =
     type_declarations;
     type_extension;
     type_exception;
+    type_effect;
     type_kind;
     value_binding;
     value_bindings;

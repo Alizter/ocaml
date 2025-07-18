@@ -1068,6 +1068,11 @@ and exception_declaration ctxt f x =
     (extension_constructor ctxt) x.ptyexn_constructor
     (item_attributes ctxt) x.ptyexn_attributes
 
+and effect_declaration ctxt f x =
+  pp f "@[<hov2>effect@ %a@]%a"
+    (extension_constructor ctxt) x.ptyeff_constructor
+    (item_attributes ctxt) x.ptyeff_attributes
+
 and class_type_field ctxt f x =
   match x.pctf_desc with
   | Pctf_inherit (ct) ->
@@ -1336,6 +1341,8 @@ and signature_item ctxt f x : unit =
       type_extension ctxt f te
   | Psig_exception ed ->
       exception_declaration ctxt f ed
+  | Psig_effect ed ->
+      effect_declaration ctxt f ed
   | Psig_class l ->
       let class_description kwd f ({pci_params=ls;pci_name={txt;_};_} as x) =
         pp f "@[<2>%s %a%a%a@;:@;%a@]%a" kwd
@@ -1537,6 +1544,7 @@ and structure_item ctxt f x =
       pp f "@[<2>%a@]" (bindings ctxt) (rf,l)
   | Pstr_typext te -> type_extension ctxt f te
   | Pstr_exception ed -> exception_declaration ctxt f ed
+  | Pstr_effect ed -> effect_declaration ctxt f ed
   | Pstr_module x ->
       let rec module_helper = function
         | {pmod_desc=Pmod_functor(arg_opt,me'); pmod_attributes = []} ->

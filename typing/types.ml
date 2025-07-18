@@ -419,6 +419,7 @@ and ext_status =
     Text_first                     (* first constructor of an extension *)
   | Text_next                      (* not first constructor of an extension *)
   | Text_exception                 (* an exception *)
+  | Text_effect                    (* an effect *)
 
 let item_visibility = function
   | Sig_value (_, _, vis)

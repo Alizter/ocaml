@@ -283,6 +283,7 @@ module Sig = struct
   let type_subst ?loc a = mk ?loc (Psig_typesubst a)
   let type_extension ?loc a = mk ?loc (Psig_typext a)
   let exception_ ?loc a = mk ?loc (Psig_exception a)
+  let effect_ ?loc a = mk ?loc (Psig_effect a)
   let module_ ?loc a = mk ?loc (Psig_module a)
   let mod_subst ?loc a = mk ?loc (Psig_modsubst a)
   let rec_module ?loc a = mk ?loc (Psig_recmodule a)
@@ -310,6 +311,7 @@ module Str = struct
   let type_ ?loc rec_flag a = mk ?loc (Pstr_type (rec_flag, a))
   let type_extension ?loc a = mk ?loc (Pstr_typext a)
   let exception_ ?loc a = mk ?loc (Pstr_exception a)
+  let effect_ ?loc a = mk ?loc (Pstr_effect a)
   let module_ ?loc a = mk ?loc (Pstr_module a)
   let rec_module ?loc a = mk ?loc (Pstr_recmodule a)
   let modtype ?loc a = mk ?loc (Pstr_modtype a)
@@ -588,6 +590,14 @@ module Te = struct
      ptyexn_loc = loc;
      ptyexn_attributes = add_docs_attrs docs attrs;
     }
+
+let mk_effect ?(loc = !default_loc) ?(attrs = []) ?(docs = empty_docs)
+    constructor =
+   {
+    ptyeff_constructor = constructor;
+    ptyeff_loc = loc;
+    ptyeff_attributes = add_docs_attrs docs attrs;
+   }
 
   let constructor ?(loc = !default_loc) ?(attrs = [])
         ?(docs = empty_docs) ?(info = empty_info) name kind =

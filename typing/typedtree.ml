@@ -310,6 +310,7 @@ and structure_item_desc =
   | Tstr_type of rec_flag * type_declaration list
   | Tstr_typext of type_extension
   | Tstr_exception of type_exception
+  | Tstr_effect of type_effect
   | Tstr_module of module_binding
   | Tstr_recmodule of module_binding list
   | Tstr_modtype of module_type_declaration
@@ -389,6 +390,7 @@ and signature_item_desc =
   | Tsig_typesubst of type_declaration list
   | Tsig_typext of type_extension
   | Tsig_exception of type_exception
+  | Tsig_effect of type_effect
   | Tsig_module of module_declaration
   | Tsig_modsubst of module_substitution
   | Tsig_recmodule of module_declaration list
@@ -591,6 +593,13 @@ and type_exception =
     tyexn_constructor: extension_constructor;
     tyexn_loc: Location.t;
     tyexn_attributes: attribute list;
+  }
+
+and type_effect =
+  {
+    tyeff_constructor: extension_constructor;
+    tyeff_loc: Location.t;
+    tyeff_attributes: attribute list;
   }
 
 and extension_constructor =

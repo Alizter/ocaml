@@ -57,6 +57,7 @@ type iterator =
     type_declarations: iterator -> (rec_flag * type_declaration list) -> unit;
     type_extension: iterator -> type_extension -> unit;
     type_exception: iterator -> type_exception -> unit;
+    type_effect: iterator -> type_effect -> unit;
     type_kind: iterator -> type_kind -> unit;
     value_binding: iterator -> value_binding -> unit;
     value_bindings: iterator -> (rec_flag * value_binding list) -> unit;
@@ -152,6 +153,7 @@ let structure_item sub {str_loc; str_desc; str_env; _} =
   | Tstr_type (rec_flag, list) -> sub.type_declarations sub (rec_flag, list)
   | Tstr_typext te -> sub.type_extension sub te
   | Tstr_exception ext -> sub.type_exception sub ext
+  | Tstr_effect ext -> sub.type_effect sub ext
   | Tstr_module mb -> sub.module_binding sub mb
   | Tstr_recmodule list -> List.iter (sub.module_binding sub) list
   | Tstr_modtype x -> sub.module_type_declaration sub x
@@ -226,6 +228,11 @@ let type_exception sub {tyexn_loc; tyexn_constructor; tyexn_attributes; _} =
   sub.location sub tyexn_loc;
   sub.attributes sub tyexn_attributes;
   sub.extension_constructor sub tyexn_constructor
+
+let type_effect sub { tyeff_loc; tyeff_constructor; tyeff_attributes} =
+  sub.location sub tyeff_loc;
+  sub.attributes sub tyeff_attributes;
+  sub.extension_constructor sub tyeff_constructor
 
 let extension_constructor sub ec =
   let {ext_loc; ext_name; ext_kind; ext_attributes; _} = ec in
@@ -416,6 +423,7 @@ let signature_item sub {sig_loc; sig_desc; sig_env; _} =
   | Tsig_typesubst list -> sub.type_declarations sub (Nonrecursive, list)
   | Tsig_typext te -> sub.type_extension sub te
   | Tsig_exception ext -> sub.type_exception sub ext
+  | Tsig_effect ext -> sub.type_effect sub ext
   | Tsig_module x -> sub.module_declaration sub x
   | Tsig_modsubst x -> sub.module_substitution sub x
   | Tsig_recmodule list -> List.iter (sub.module_declaration sub) list
@@ -702,6 +710,7 @@ let default_iterator =
     type_declarations;
     type_extension;
     type_exception;
+    type_effect;
     type_kind;
     value_binding;
     value_bindings;

@@ -490,6 +490,7 @@ module Module :
       | Element_value of Value.t_value
       | Element_type_extension of Extension.t_type_extension
       | Element_exception of Exception.t_exception
+      | Element_effect of unit (* TODO *)
       | Element_type of Type.t_type
       | Element_module_comment of text
 
@@ -935,6 +936,7 @@ module Scan :
         method scan_type : Type.t_type -> unit
         method scan_extension_constructor : Extension.t_extension_constructor -> unit
         method scan_exception : Exception.t_exception -> unit
+        method scan_effect : unit -> unit
         method scan_attribute : Value.t_attribute -> unit
         method scan_method : Value.t_method -> unit
         method scan_included_module : Module.included_module -> unit

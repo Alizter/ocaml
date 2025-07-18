@@ -252,6 +252,8 @@ module Generator :
           Odoc_info.Name.t -> Odoc_parameter.parameter list -> unit
         method html_of_exception :
           Buffer.t -> Odoc_info.Exception.t_exception -> unit
+        method html_of_effect :
+          Buffer.t -> unit -> unit (* TODO *)
         method html_of_included_module :
           Buffer.t -> Odoc_info.Module.included_module -> unit
         method html_of_info :
@@ -549,6 +551,8 @@ module type Html_generator =
           Odoc_info.Name.t -> Odoc_parameter.parameter list -> unit
         method html_of_exception :
           Buffer.t -> Odoc_info.Exception.t_exception -> unit
+        method html_of_effect :
+          Buffer.t -> unit -> unit (* TODO *)
         method html_of_included_module :
           Buffer.t -> Odoc_info.Module.included_module -> unit
         method html_of_info :

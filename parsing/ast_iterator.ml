@@ -71,6 +71,7 @@ type iterator = {
   type_declaration: iterator -> type_declaration -> unit;
   type_extension: iterator -> type_extension -> unit;
   type_exception: iterator -> type_exception -> unit;
+  type_effect: iterator -> type_effect -> unit;
   type_kind: iterator -> type_kind -> unit;
   value_binding: iterator -> value_binding -> unit;
   value_description: iterator -> value_description -> unit;
@@ -202,6 +203,12 @@ module T = struct
     sub.location sub ptyexn_loc;
     sub.attributes sub ptyexn_attributes
 
+  let iter_type_effect sub
+      {ptyeff_constructor; ptyeff_loc; ptyeff_attributes} =
+    sub.extension_constructor sub ptyeff_constructor;
+    sub.location sub ptyeff_loc;
+    sub.attributes sub ptyeff_attributes
+
   let iter_extension_constructor_kind sub = function
       Pext_decl(vars, ctl, cto) ->
         List.iter (iter_loc sub) vars;
@@ -310,6 +317,7 @@ module MT = struct
       List.iter (sub.type_declaration sub) l
     | Psig_typext te -> sub.type_extension sub te
     | Psig_exception ed -> sub.type_exception sub ed
+    | Psig_effect ed -> sub.type_effect sub ed
     | Psig_module x -> sub.module_declaration sub x
     | Psig_modsubst x -> sub.module_substitution sub x
     | Psig_recmodule l ->
@@ -359,6 +367,7 @@ module M = struct
     | Pstr_type (_rf, l) -> List.iter (sub.type_declaration sub) l
     | Pstr_typext te -> sub.type_extension sub te
     | Pstr_exception ed -> sub.type_exception sub ed
+    | Pstr_effect ed -> sub.type_effect sub ed
     | Pstr_module x -> sub.module_binding sub x
     | Pstr_recmodule l -> List.iter (sub.module_binding sub) l
     | Pstr_modtype x -> sub.module_type_declaration sub x
@@ -608,6 +617,7 @@ let default_iterator =
     object_field = T.object_field;
     type_extension = T.iter_type_extension;
     type_exception = T.iter_type_exception;
+    type_effect = T.iter_type_effect;
     extension_constructor = T.iter_extension_constructor;
     package_type = T.iter_package_type;
     value_description =

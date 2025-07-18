@@ -67,6 +67,7 @@ type mapper = {
   type_declaration: mapper -> T.type_declaration -> type_declaration;
   type_extension: mapper -> T.type_extension -> type_extension;
   type_exception: mapper -> T.type_exception -> type_exception;
+  type_effect: mapper -> T.type_effect -> type_effect;
   type_kind: mapper -> T.type_kind -> type_kind;
   value_binding: mapper -> T.value_binding -> value_binding;
   value_description: mapper -> T.value_description -> value_description;
@@ -169,6 +170,8 @@ let structure_item sub item =
         Pstr_typext (sub.type_extension sub tyext)
     | Tstr_exception ext ->
         Pstr_exception (sub.type_exception sub ext)
+    | Tstr_effect ext ->
+        Pstr_effect (sub.type_effect sub ext)
     | Tstr_module mb ->
         Pstr_module (sub.module_binding sub mb)
     | Tstr_recmodule list ->
@@ -268,6 +271,11 @@ let type_exception sub tyexn =
   let attrs = sub.attributes sub tyexn.tyexn_attributes in
   Te.mk_exception ~attrs
     (sub.extension_constructor sub tyexn.tyexn_constructor)
+
+let type_effect sub tyeff =
+  let attrs = sub.attributes sub tyeff.tyeff_attributes in
+  Te.mk_effect ~attrs
+    (sub.extension_constructor sub tyeff.tyeff_constructor)
 
 let extension_constructor sub ext =
   let loc = sub.location sub ext.ext_loc in
@@ -613,6 +621,8 @@ let signature_item sub item =
         Psig_typext (sub.type_extension sub tyext)
     | Tsig_exception ext ->
         Psig_exception (sub.type_exception sub ext)
+    | Tsig_effect ext ->
+        Psig_effect (sub.type_effect sub ext)
     | Tsig_module md ->
         Psig_module (sub.module_declaration sub md)
     | Tsig_modsubst ms ->
@@ -946,6 +956,7 @@ let default_mapper =
     typ = core_type;
     type_extension = type_extension;
     type_exception = type_exception;
+    type_effect = type_effect;
     extension_constructor = extension_constructor;
     value_description = value_description;
     pat = pattern;

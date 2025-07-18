@@ -333,6 +333,7 @@ let rec remove_module_elements_between_stop keep eles =
       | Odoc_module.Element_value _
       | Odoc_module.Element_type_extension _
       | Odoc_module.Element_exception _
+      | Odoc_module.Element_effect _
       | Odoc_module.Element_type _ ->
           if keep then
             ele :: (f keep q)
