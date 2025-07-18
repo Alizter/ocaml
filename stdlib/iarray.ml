@@ -273,8 +273,8 @@ let find_mapi f a =
   loop 0
 
 let split x =
-  if equal (=) (* unused *) x [||] then ([||], [||] : _ iarray * _ iarray)
-  else begin
+  (* if equal (=) (* unused *) x [||] then ([||], [||] : _ iarray * _ iarray) *)
+  (* else begin *)
     let a0, b0 = unsafe_get x 0 in
     let n = length x in
     let a = Array.make n a0 in
@@ -285,7 +285,7 @@ let split x =
       Array.unsafe_set b i bi
     done;
     unsafe_of_array a, unsafe_of_array b
-  end
+  (* end *)
 
 let combine a b =
   let na = length a in
