@@ -441,12 +441,16 @@ private types or types without a manifest (e.g., abstract types).
 Type-check the source implementation to be compiled against the
 specified interface file (bypasses the normal lookup for .mli and .cmi files).
 .TP
-.BI \-I " directory"
+.BI \-I " directory-or-file"
 Add the given directory to the list of directories searched for
 compiled interface files (.cmi), compiled object code files
 (.cmo), libraries (.cma), and C libraries specified with
 .BI \-cclib\ \-l xxx\c
 \[char46]
+If the argument is a path to an existing file (e.g.
+.BR \-I\ dir/foo.cmi ),
+only that file is registered; other files in the same directory
+are not discoverable unless explicitly added.
 By default, the current directory is searched first, then the
 standard library directory. Directories added with
 .B \-I

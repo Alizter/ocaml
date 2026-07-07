@@ -291,13 +291,36 @@ Cause the compiler to print the computed variance of type parameters for
 every type declaration.  Without this option, variance is printed only for
 private types or types without a manifest (e.g., abstract types).
 
-\item["-I" \var{directory}]
+\item["-I" \var{directory-or-file}]
 Add the given directory to the list of directories searched for
 \nat{compiled interface files (".cmi"), compiled object code files (".cmx"),
 and libraries (".cmxa").}
 \comp{compiled interface files (".cmi"), compiled object code files (".cmo"),
 libraries (".cma") and C libraries specified with "-cclib -lxxx".}
 \top{source and compiled files.}
+
+If the argument is a path to an existing file (e.g., "-I dir/foo.cmi"),
+only that single file is registered; other files in the same directory
+are not discoverable.  This enables hermetic builds: each compilation
+step sees exactly the modules it needs.
+
+File entries follow the same precedence rules as directories: earlier
+"-I" flags on the command line take priority.  For example,
+"-I lib_v1/a.cmi -I lib_v2/" makes module "A" resolve to
+"lib_v1/a.cmi" (the file entry wins), while module "B" is found in
+"lib_v2/" (the directory entry supplies it).  Reversing the order
+("-I lib_v2/ -I lib_v1/a.cmi") makes the directory entry win for
+"A" since it appears first.
+
+Compilation and linking use separate registrations: "-I dir/a.cmi"
+makes the interface available for type-checking, while "-I dir/a.cmo"
+makes the bytecode object available for linking.  Both can be combined
+("-I dir/a.cmi -I dir/a.cmo") to support full separate compilation.
+
+Any existing file is accepted; there is no restriction on extension.
+Passing a file with an unexpected extension (e.g., ".txt") creates a
+harmless entry that will never be queried.
+
 By default, the current directory is searched first, then the standard
 library directory. Directories added with "-I" are searched after the
 current directory, in the order in which they were given on the command line,
@@ -314,13 +337,19 @@ the toplevel is running with the "#directory" directive
 }%top
 
 \notop{%
-\item["-H" \var{directory}]
-Behaves identically to "-I", except that (a) programs may not directly refer to
+\item["-H" \var{directory-or-file}]
+Behaves identically to "-I", including support for file paths and the
+same precedence rules, except that (a) programs may not directly refer to
 modules added to the search path this way, and (b) these directories are
 searched after any "-I" directories.  This makes it possible to provide the
 compiler with compiled interface and object code files for the current program's
-transitive dependencies (the dependencies of its dependencies) without allowing
-them to silently become direct dependencies.
+dependencies while limiting which modules the program itself may import.
+
+File entries interact with directory entries: "-H dir/ -I dir/a.cmi"
+hides all of "dir/" except "a.cmi", which is lifted into visibility by
+the later "-I".  Conversely, "-I dir/ -H dir/a.cmi" makes the entire
+directory visible; the "-H" on a.cmi has no effect because "-I" on the
+directory takes priority.
 }%notop
 
 \top{%
