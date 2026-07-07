@@ -31,7 +31,7 @@ val remove_dir : string -> unit
 val reset : unit -> unit
 (** Remove all directories *)
 
-module Dir : sig
+module Entry : sig
   type t
   (** Represent one entry (directory or file) in the load path. *)
 
@@ -65,7 +65,7 @@ module Dir : sig
 end
 
 type auto_include_callback =
-  (Dir.t -> string -> string option) -> string -> string
+  (Entry.t -> string -> string option) -> string -> string
 (** The type of callback functions on for [init ~auto_include] *)
 
 val no_auto_include : auto_include_callback
@@ -113,18 +113,21 @@ val find_normalized_with_visibility : string -> string * visibility
 (** Same as [find_normalized], but also reports whether the cmi was found in a
     -I directory (Visible) or a -H directory (Hidden) *)
 
-val[@deprecated] add : Dir.t -> unit
+val[@deprecated] add : Entry.t -> unit
 (** Old name for {!append_dir} *)
 
-val append_dir : Dir.t -> unit
+val append_dir : Entry.t -> unit
 (** [append_dir d] adds [d] to the end of the load path (i.e. at lowest
     priority. *)
 
-val prepend_dir : Dir.t -> unit
+val prepend_dir : Entry.t -> unit
 (** [prepend_dir d] adds [d] to the start of the load path (i.e. at highest
     priority. *)
 
-val get_visible : unit -> Dir.t list
+val get_visible : unit -> Entry.t list
 (** Returns all visible entries, including file-level [-I] entries (which
-    have [Dir.is_file = true]).  Use [Dir.find] to locate files within an
-    entry; do not assume [Dir.path] is always a directory. *)
+    have [Entry.is_file = true]).  Use [Entry.find] to locate files within an
+    entry; do not assume [Entry.path] is always a directory. *)
+
+module Dir = Entry
+[@@deprecated "Use Load_path.Entry instead"]

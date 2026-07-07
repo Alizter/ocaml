@@ -80,7 +80,7 @@ let dir_directory s =
     Format.printf "Not a directory: %s\n%!" d
   else begin
     Dll.add_path [d];
-    let dir = Load_path.Dir.create ~hidden:false d in
+    let dir = Load_path.Entry.create ~hidden:false d in
     Load_path.prepend_dir dir;
     toplevel_env :=
       Stdlib.String.Set.fold
