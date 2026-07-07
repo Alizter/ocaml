@@ -75,15 +75,20 @@ let _ = add_directive "quit" (Directive_none dir_quit)
 
 let dir_directory s =
   let d = expand_directory Config.standard_library s in
-  if Sys.is_directory d then Dll.add_path [d];
-  let dir = Load_path.Dir.create ~hidden:false d in
-  Load_path.prepend_dir dir;
-  toplevel_env :=
-    Stdlib.String.Set.fold
-      (fun name env ->
-         Env.add_persistent_structure (Ident.create_persistent name) env)
-      (Env.persistent_structures_of_dir dir)
-      !toplevel_env
+  let is_dir = try Sys.is_directory d with Sys_error _ -> false in
+  if not is_dir then
+    Format.printf "Not a directory: %s\n%!" d
+  else begin
+    Dll.add_path [d];
+    let dir = Load_path.Dir.create ~hidden:false d in
+    Load_path.prepend_dir dir;
+    toplevel_env :=
+      Stdlib.String.Set.fold
+        (fun name env ->
+           Env.add_persistent_structure (Ident.create_persistent name) env)
+        (Env.persistent_structures_of_dir dir)
+        !toplevel_env
+  end
 
 let _ = add_directive "directory" (Directive_string dir_directory)
     {
