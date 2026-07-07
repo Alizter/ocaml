@@ -1,0 +1,4 @@
+File "src/b.ml", line 1, characters 8-9:
+1 | let y = A.x
+            ^
+Error: Unbound module A

@@ -289,7 +289,7 @@ let set_paths ?(auto_include=Compmisc.auto_include) ?(dir="") () =
     ]
   in
   Load_path.init ~auto_include ~visible ~hidden;
-  Dll.add_path (visible @ hidden)
+  Dll.add_path (Load_path.get_path_list ())
 
 let update_search_path_from_env () =
   let extra_paths =

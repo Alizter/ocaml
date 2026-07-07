@@ -164,11 +164,11 @@ let mk_i_variance f =
   "-i-variance", Arg.Unit f, " Print inferred variances"
 
 let mk_I f =
-  "-I", Arg.String f, "<dir>  Add <dir> to the list of include directories"
+  "-I", Arg.String f, "<dir-or-file>  Add <dir-or-file> to the list of include directories"
 
 let mk_H f =
   "-H", Arg.String f,
-  "<dir>  Add <dir> to the list of \"hidden\" include directories\n\
+  "<dir-or-file>  Add <dir-or-file> to the list of \"hidden\" include directories\n\
  \     (Like -I, but the program can not directly reference these dependencies)"
 
 let mk_set_runtime_default f =

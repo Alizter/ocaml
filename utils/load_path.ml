@@ -26,31 +26,63 @@ let hidden_files : registry ref = s_table STbl.create 42
 let hidden_files_uncap : registry ref = s_table STbl.create 42
 
 module Dir = struct
-  type t = {
-    path : string;
-    files : string list;
-    hidden : bool;
-  }
+  type t =
+    | Directory of {
+        path : string;
+        files : string list;
+        hidden : bool;
+      }
+    | File_entry of {
+        parent_dir : string;
+        basename : string;
+        hidden : bool;
+      }
 
-  let path t = t.path
-  let files t = t.files
-  let hidden t = t.hidden
+  let path = function
+    | Directory d -> d.path
+    | File_entry f -> f.parent_dir
+
+  let files = function
+    | Directory d -> d.files
+    | File_entry f -> [f.basename]
+
+  let hidden = function
+    | Directory d -> d.hidden
+    | File_entry f -> f.hidden
+
+  let is_file = function
+    | Directory _ -> false
+    | File_entry _ -> true
 
   let find t fn =
-    if List.mem fn t.files then
-      Some (Filename.concat t.path fn)
-    else
-      None
+    match t with
+    | Directory d ->
+      if List.mem fn d.files then
+        Some (Filename.concat d.path fn)
+      else
+        None
+    | File_entry f ->
+      if fn = f.basename then
+        Some (Filename.concat f.parent_dir fn)
+      else
+        None
 
   let find_normalized t fn =
     let fn = Misc.normalized_unit_filename fn in
-    let search base =
-      if Misc.normalized_unit_filename base = fn then
-        Some (Filename.concat t.path base)
+    match t with
+    | Directory d ->
+      let search base =
+        if Misc.normalized_unit_filename base = fn then
+          Some (Filename.concat d.path base)
+        else
+          None
+      in
+      List.find_map search d.files
+    | File_entry f ->
+      if Misc.normalized_unit_filename f.basename = fn then
+        Some (Filename.concat f.parent_dir f.basename)
       else
         None
-    in
-    List.find_map search t.files
 
   (* For backward compatibility reason, simulate the behavior of
      [Misc.find_in_path]: silently ignore directories that don't exist
@@ -62,7 +94,31 @@ module Dir = struct
       [||]
 
   let create ~hidden path =
-    { path; files = Array.to_list (readdir_compat path); hidden }
+    let path =
+      (* For backward compatibility, treat [""] as the current directory,
+         like [readdir_compat] does. *)
+      if path = "" then Filename.current_dir_name else path
+    in
+    if Sys.file_exists path then
+      if Sys.is_directory path then
+        Directory {
+          path;
+          files = Array.to_list (readdir_compat path);
+          hidden;
+        }
+      else
+        File_entry {
+          parent_dir = Filename.dirname path;
+          basename = Filename.basename path;
+          hidden
+        }
+    else
+      (* Backward compatibility: non-existent paths silently produce an
+         empty entry.  We cannot distinguish between a non-existent file
+         and a non-existent directory, so we treat it as a directory;
+         tools may legitimately pre-create include paths before they
+         are populated. *)
+      Directory { path; files = []; hidden }
 end
 
 type auto_include_callback =
@@ -85,19 +141,26 @@ let reset () =
 
 let get_visible () = List.rev !visible_dirs
 
+(* Filter out file-level [-I] entries from path lists.  These entries
+   should not appear in directory-level APIs like [get_path_list], which
+   consumers such as the C linker, DLL loader, debugger, and .cmt
+   metadata use to iterate over include directories. *)
+let dir_only_paths dirs =
+  List.filter_map
+    (function Dir.Directory d -> Some d.path | Dir.File_entry _ -> None)
+    dirs
+  |> List.rev
+
 let get_path_list () =
-  Misc.rev_map_end Dir.path !visible_dirs (List.rev_map Dir.path !hidden_dirs)
+  dir_only_paths !visible_dirs @ dir_only_paths !hidden_dirs
 
 type paths =
   { visible : string list;
     hidden : string list }
 
 let get_paths () =
-  { visible = List.rev_map Dir.path !visible_dirs;
-    hidden = List.rev_map Dir.path !hidden_dirs }
-
-let get_visible_path_list () = List.rev_map Dir.path !visible_dirs
-let get_hidden_path_list () = List.rev_map Dir.path !hidden_dirs
+  { visible = dir_only_paths !visible_dirs;
+    hidden = dir_only_paths !hidden_dirs }
 
 (* Optimized version of [add] below, for use in [init] and [remove_dir]: since
    we are starting from an empty cache, we can avoid checking whether a unit
@@ -106,8 +169,8 @@ let get_hidden_path_list () = List.rev_map Dir.path !hidden_dirs
 let prepend_add dir =
   List.iter (fun base ->
       Result.iter (fun filename ->
-          let fn = Filename.concat dir.Dir.path base in
-          if dir.Dir.hidden then begin
+          let fn = Filename.concat (Dir.path dir) base in
+          if Dir.hidden dir then begin
             STbl.replace !hidden_files base fn;
             STbl.replace !hidden_files_uncap filename fn
           end else begin
@@ -115,7 +178,7 @@ let prepend_add dir =
             STbl.replace !visible_files_uncap filename fn
           end)
         (Misc.normalized_unit_filename base)
-    ) dir.Dir.files
+    ) (Dir.files dir)
 
 let init ~auto_include ~visible ~hidden =
   reset ();
@@ -127,8 +190,15 @@ let init ~auto_include ~visible ~hidden =
 
 let remove_dir dir =
   assert (not Config.merlin || Local_store.is_bound ());
-  let visible = List.filter (fun d -> Dir.path d <> dir) !visible_dirs in
-  let hidden = List.filter (fun d -> Dir.path d <> dir) !hidden_dirs in
+  let matches d =
+    Dir.path d = dir
+    || match d with
+       | Dir.File_entry f ->
+         Filename.concat f.parent_dir f.basename = dir
+       | Dir.Directory _ -> false
+  in
+  let visible = List.filter (fun d -> not (matches d)) !visible_dirs in
+  let hidden = List.filter (fun d -> not (matches d)) !hidden_dirs in
   if    List.compare_lengths visible !visible_dirs <> 0
      || List.compare_lengths hidden !hidden_dirs <> 0 then begin
     let saved_auto_include = !auto_include_callback in
@@ -146,7 +216,7 @@ let remove_dir dir =
 let add (dir : Dir.t) =
   assert (not Config.merlin || Local_store.is_bound ());
   let update base fn visible_files hidden_files =
-    if dir.hidden then begin
+    if Dir.hidden dir then begin
       if not (STbl.mem !hidden_files base) then
         STbl.replace !hidden_files base fn
     end else if not (STbl.mem !visible_files base) then
@@ -155,14 +225,14 @@ let add (dir : Dir.t) =
   List.iter
     (fun base ->
        Result.iter (fun ubase ->
-           let fn = Filename.concat dir.Dir.path base in
+           let fn = Filename.concat (Dir.path dir) base in
            update base fn visible_files hidden_files;
            update ubase fn visible_files_uncap hidden_files_uncap
          )
          (Misc.normalized_unit_filename base)
     )
-    dir.files;
-  if dir.hidden then
+    (Dir.files dir);
+  if Dir.hidden dir then
     hidden_dirs := dir :: !hidden_dirs
   else
     visible_dirs := dir :: !visible_dirs
@@ -176,7 +246,7 @@ let add_dir ~hidden dir = add (Dir.create ~hidden dir)
 let prepend_dir (dir : Dir.t) =
   assert (not Config.merlin || Local_store.is_bound ());
   prepend_add dir;
-  if dir.hidden then
+  if Dir.hidden dir then
     hidden_dirs := !hidden_dirs @ [dir]
   else
     visible_dirs := !visible_dirs @ [dir]
@@ -214,10 +284,11 @@ let find_file_in_cache fn visible_files hidden_files =
 let find fn =
   assert (not Config.merlin || Local_store.is_bound ());
   try
-    if is_basename fn && not !Sys.interactive then
+    if is_basename fn then
       fst (find_file_in_cache fn visible_files hidden_files)
     else
-      Misc.find_in_path (get_path_list ()) fn
+      Misc.find_in_path
+        (dir_only_paths !visible_dirs @ dir_only_paths !hidden_dirs) fn
   with Not_found ->
     !auto_include_callback Dir.find fn
 
@@ -227,15 +298,17 @@ let find_normalized_with_visibility fn =
   | Error _ -> raise Not_found
   | Ok fn_uncap ->
   try
-    if is_basename fn && not !Sys.interactive then
+    if is_basename fn then
       find_file_in_cache fn_uncap
         visible_files_uncap hidden_files_uncap
     else
       try
-        (Misc.find_in_path_normalized (get_visible_path_list ()) fn, Visible)
+        (Misc.find_in_path_normalized
+           (dir_only_paths !visible_dirs) fn, Visible)
       with
       | Not_found ->
-        (Misc.find_in_path_normalized (get_hidden_path_list ()) fn, Hidden)
+        (Misc.find_in_path_normalized
+           (dir_only_paths !hidden_dirs) fn, Hidden)
   with Not_found ->
     (!auto_include_callback Dir.find_normalized fn_uncap, Visible)
 

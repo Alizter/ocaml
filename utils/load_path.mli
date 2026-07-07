@@ -33,15 +33,24 @@ val reset : unit -> unit
 
 module Dir : sig
   type t
-  (** Represent one directory in the load path. *)
+  (** Represent one entry (directory or file) in the load path. *)
 
   val create : hidden:bool -> string -> t
+  (** [create ~hidden path] creates a directory entry. If [path] is a
+      regular file, only that file is registered; if it is a directory,
+      all files in it are registered (existing behavior). Non-existent
+      paths silently produce an empty entry. *)
 
   val path : t -> string
 
   val files : t -> string list
-  (** All the files in that directory. This doesn't include files in
-      sub-directories of this directory. *)
+  (** For directory entries: all the files in that directory (excluding
+      sub-directories). For file-level entries created via
+      [-I file.cmi]: a singleton list containing only that file. *)
+
+  val is_file : t -> bool
+  (** [true] if this entry was created from a single file
+      (e.g. [-I file.cmi]) rather than a directory. *)
 
   val hidden : t -> bool
   (** If the modules in this directory should not be bound in the initial
@@ -116,5 +125,6 @@ val prepend_dir : Dir.t -> unit
     priority. *)
 
 val get_visible : unit -> Dir.t list
-(** Same as [get_paths ()], except that it returns a [Dir.t list], and doesn't
-    include the -H paths. *)
+(** Returns all visible entries, including file-level [-I] entries (which
+    have [Dir.is_file = true]).  Use [Dir.find] to locate files within an
+    entry; do not assume [Dir.path] is always a directory. *)
